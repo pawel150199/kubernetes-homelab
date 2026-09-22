@@ -24,7 +24,7 @@ jobs:
         run: |
           pip install flake8
           pip install black
-      
+
       - name: Downlaod pre-commit
         run: |
           pip install pre-commit
@@ -32,7 +32,7 @@ jobs:
 
       - name: Downlaod terraform
         uses: hashicorp/setup-terraform@v4
-      
+
       - name: Verify terraform installation
         run: |
           terraform -help

@@ -33,7 +33,7 @@ Then, you have to prepare some prerequisites, such as S3 bucket, Hetner API toke
     aws configure --profile private
     aws s3api create-bucket \
         --bucket kubernetes-homelab \
-        --region eu-central-1 
+        --region eu-central-1
     ```
 
 - Obtain Hetzner API token and configure it as an environment variable (token has to have read and write permissions):
