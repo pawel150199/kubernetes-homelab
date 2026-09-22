@@ -9,6 +9,7 @@ Icon
 
 # Terraform
 .terraform
+*/.terraform
 
 # Thumbnails
 ._*

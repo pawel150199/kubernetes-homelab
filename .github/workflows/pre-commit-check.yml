@@ -1,0 +1,48 @@
+name: Pre-commit check
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pre-commit-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Download flake and black
+        run: |
+          pip install flake8
+          pip install black
+      
+      - name: Downlaod pre-commit
+        run: |
+          pip install pre-commit
+          pre-commit install
+
+      - name: Downlaod terraform
+        uses: hashicorp/setup-terraform@v4
+      
+      - name: Verify terraform installation
+        run: |
+          terraform -help
+
+      - name: Install tflint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.64.0
+          cache: true
+
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit run --all-files
