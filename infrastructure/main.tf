@@ -4,10 +4,10 @@ module "hcloud_kubernetes_cluster" {
   worker_nodes_number = 1
   master_nodes_number = 1
 
-  node_image    = "ubuntu-26.04"
-  master_node_type     = "cx23" # This instance type is cost-optimized and it can be not available
-  worker_node_type     = "cx23" # This instance type is cost-optimized and it can be not available
-  node_location = "hel1"
+  node_image       = "ubuntu-26.04"
+  master_node_type = "cx23" # This instance type is cost-optimized and it can be not available
+  worker_node_type = "cx23" # This instance type is cost-optimized and it can be not available
+  node_location    = "hel1"
 
   node_enable_ipv4 = true
   node_enable_ipv6 = true
