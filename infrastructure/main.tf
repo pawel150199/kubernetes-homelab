@@ -1,5 +1,5 @@
 module "hcloud_kubernetes_cluster" {
-  source = "git::https://github.com/pawel150199/hcloud-k8s-cluster.git?ref=0.1.12"
+  source = "git::https://github.com/pawel150199/hcloud-k8s-cluster.git?ref=0.1.14"
 
   worker_nodes_number = 1
   master_nodes_number = 1

@@ -1,0 +1,117 @@
+name: Deploy Homelab infrastructure
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "infrastructure/**"
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dry-run-deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_PROFILE: homelab
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Verify terraform installation
+        run: |
+          terraform -help
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          aws-region: eu-central-1
+          aws-profile: homelab
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Verify AWS connection
+        run: |
+          aws sts get-caller-identity
+
+      - name: Dry-run Deploy Homelab infrastructure
+        run: |
+          cd infrastructure
+          terraform init
+          terraform plan -out=tfplan -input=false
+          terraform show -no-color tfplan > plan.txt
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+
+      - name: Upload plan
+        uses: actions/upload-artifact@v7
+        with:
+          name: tfplan
+          path: |
+            infrastructure/tfplan
+            infrastructure/plan.txt
+          retention-days: 1
+
+  wait-for-approval:
+    runs-on: ubuntu-latest
+    needs: dry-run-deploy
+    permissions:
+      issues: write
+    steps:
+      - name: Wait for approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: ${{ github.repository_owner }}
+          minimum-approvals: 1
+          issue-title: "Deploying infrastructure to Homelab"
+          issue-body: "Please approve of deny the deployment"
+          fail-on-denial: true
+
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_PROFILE: homelab
+    needs: wait-for-approval
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Verify terraform installation
+        run: |
+          terraform -help
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          aws-region: eu-central-1
+          aws-profile: homelab
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Verify AWS connection
+        run: |
+          aws sts get-caller-identity
+
+      - name: Download Terraform plan output
+        uses: actions/download-artifact@v8
+        with:
+          name: tfplan
+          path: infrastructure
+
+      - name: Deploy Homelab infrastructure
+        run: |
+          cd infrastructure
+          terraform init
+          terraform apply -input=false tfplan
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}

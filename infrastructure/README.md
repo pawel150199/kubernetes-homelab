@@ -62,6 +62,31 @@ Then, you have to prepare some prerequisites, such as S3 bucket, Hetner API toke
    terraform apply
    ```
 
+## Automatic GitHub Actions Integration
+
+### Prerequisite for GitHub Actions Integration
+
+To Integrate GitHub Actions you havve to add secrets in your repository:
+
+- `AWS_ACCESS_KEY_ID` - Your AWS access key ID
+- `AWS_SECRET_ACCESS_KEY` - Your AWS secret access key
+- `HCLOUD_TOKEN` - Your Hetzner API token
+
+You also have to create S3 bucket in AWS for storing terraform state, as mentioned in manual steps above.
+
+## GitHub Actions Integration
+
+The GitHub Actions integration has been set up to automatically apply the terraform configuration whenever changes are pushed to the repository.
+There is also possibility to manually trigger runs from the GitHub Actions tab.
+
+Automatic runs are triggered on every push to the master branch in the path `infrastructure/`.
+
+This automatic pipeline has 3 jobs defined `dry-run-deploy`, `wait-for-approval`, and `deploy`.
+
+> **Note:** The `wait-for-approval` job requires manual approval before the `deploy` job is executed.
+
+> **Note:** Concurency in the GitHub Actions pipeline is managed to ensure that only one deployment runs at a time.
+
 ## Connect to Kubernetes Cluster
 
 After applying the terraform configuration, you can connect to your Kubernetes cluster using `kubectl`. The K3S module should generate a kubeconfig file for you.
@@ -78,3 +103,4 @@ After applying the terraform configuration, you can connect to your Kubernetes c
     ```bash
     kubectl get nodes
     ```
+
