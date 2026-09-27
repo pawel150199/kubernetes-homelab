@@ -12,10 +12,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          fetch-depth: 0
+
+      - name: Check for infrastructure changes
+        id: filter
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual run - skipping path filter."
+            echo "infrastructure=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          base="$(git rev-parse --verify --quiet "${HEAD_SHA}^" || true)"
+          if [ -z "$base" ]; then
+            echo "No parent commit found - deploying to be safe."
+            echo "infrastructure=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed="$(git diff --name-only "$base" "$HEAD_SHA")"
+          echo "Changed files:"
+          echo "$changed"
+
+          if echo "$changed" | grep -qE '^infrastructure/'; then
+            echo "Infrastructure changed - deployment will run."
+            echo "infrastructure=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No infrastructure changes - skipping deployment."
+            echo "infrastructure=false" >> "$GITHUB_OUTPUT"
+          fi
+
   dry-run-deploy:
     runs-on: ubuntu-latest
     environment: homelab
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.infrastructure == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
