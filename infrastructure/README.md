@@ -103,4 +103,3 @@ After applying the terraform configuration, you can connect to your Kubernetes c
     ```bash
     kubectl get nodes
     ```
-
