@@ -221,7 +221,6 @@ terragrunt-debug.tfvars.json
 .history
 .ionide
 
-
 # Generated tf files
 backend.tf
 configuration.tf
