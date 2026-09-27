@@ -2,11 +2,10 @@ name: Deploy Homelab infrastructure
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "infrastructure/**"
-    branches:
-      - master
+  workflow_run:
+    workflows: ["Pre-commit check"]
+    types: [completed]
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,11 +14,13 @@ concurrency:
 jobs:
   dry-run-deploy:
     runs-on: ubuntu-latest
-    env:
-      AWS_PROFILE: homelab
+    environment: homelab
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v4
@@ -32,7 +33,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           aws-region: eu-central-1
-          aws-profile: homelab
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -76,12 +76,13 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    env:
-      AWS_PROFILE: homelab
+    environment: homelab
     needs: wait-for-approval
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v4
@@ -94,7 +95,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           aws-region: eu-central-1
-          aws-profile: homelab
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
