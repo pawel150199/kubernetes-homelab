@@ -93,6 +93,7 @@ jobs:
           terraform show -no-color tfplan > plan.txt
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_tailscale_auth_key: ${{ secrets.TAILSCALE_AUTH_KEY }}
 
       - name: Upload plan
         uses: actions/upload-artifact@v7
@@ -160,3 +161,4 @@ jobs:
           terraform apply -input=false tfplan
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_tailscale_auth_key: ${{ secrets.TAILSCALE_AUTH_KEY }}
