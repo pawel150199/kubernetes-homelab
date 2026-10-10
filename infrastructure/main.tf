@@ -4,7 +4,7 @@ module "hcloud_kubernetes_cluster" {
   worker_nodes_number = 1
   master_nodes_number = 1
 
-  node_image       = "ubuntu-26.04"
+  node_image = "ubuntu-26.04"
   # Instance CX23 can be sometimes not available
   # This instance is cost-optimized and is cheaper but sometimes can be not available
   master_node_type = "cx23"
@@ -13,13 +13,14 @@ module "hcloud_kubernetes_cluster" {
 
   # Public IP Addresses are not needed in my case
   # We are using tailscale to communicate with kube-api and to login directly to the nodes
-  use_public_ipv4 = true
+  use_public_ipv4 = false
   use_public_ipv6 = false
 
   # Enable tailscale network
   # It will allow you to have secure not publicly available
   # K8S cluster with convinent access via tailscale network
-  use_tailscale = true
+  use_tailscale      = true
+  tailscale_auth_key = var.tailscale_auth_key
 
   # Placement Group spread nodes on different physical machines. It decreases the probability that some instances might fail together
   use_placement_group = true
