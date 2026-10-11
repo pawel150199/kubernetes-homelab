@@ -13,7 +13,7 @@ module "hcloud_kubernetes_cluster" {
 
   # Public IP Addresses are not needed in my case
   # We are using tailscale to communicate with kube-api and to login directly to the nodes
-  use_public_ipv4 = false
+  use_public_ipv4 = true
   use_public_ipv6 = false
 
   # Enable tailscale network
