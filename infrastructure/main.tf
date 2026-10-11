@@ -1,5 +1,5 @@
 module "hcloud_kubernetes_cluster" {
-  source = "git::https://github.com/pawel150199/hcloud-k8s-cluster.git?ref=0.1.19"
+  source = "git::https://github.com/pawel150199/hcloud-k8s-cluster.git?ref=0.1.20"
 
   worker_nodes_number = 1
   master_nodes_number = 1
@@ -13,7 +13,7 @@ module "hcloud_kubernetes_cluster" {
 
   # Public IP Addresses are not needed in my case
   # We are using tailscale to communicate with kube-api and to login directly to the nodes
-  use_public_ipv4 = true
+  use_public_ipv4 = false
   use_public_ipv6 = false
 
   # Enable tailscale network
