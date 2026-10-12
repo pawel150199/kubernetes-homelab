@@ -177,7 +177,7 @@ pyrightconfig.json
 .terraform.lock.hcl
 
 # Kubeconfig copied in for the ArgoCD bootstrap — contains cluster-admin credentials
-bootstrap/kube-config/
+bootstrap/.kube
 
 # .tfstate files
 *.tfstate

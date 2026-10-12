@@ -1,2 +1,0 @@
-# kubeconfig file include certs, so it is not recommended to commit it to git repo. It is better to keep it in some secure place like password manager or encrypted storage.
-.kube
