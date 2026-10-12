@@ -1,0 +1,14 @@
+livenessProbe:
+  enabled: true
+
+metrics:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+
+server:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2

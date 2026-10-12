@@ -13,7 +13,8 @@ bootstrap installs ArgoCD, and ArgoCD deploys the cluster addons and application
   (own module: `pawel150199/hcloud-k8s-cluster`, currently `0.1.19`).
 - 1 master + 1 worker (`cx23`, `ubuntu-26.04`, `hel1`), placement group, private network.
 - Tailscale on the nodes (`--ssh`), S3 state backend, CI on GitHub Actions.
-- `bootstrap/` — stub directory for the Terraform that installs ArgoCD (README only so far).
+- `bootstrap/` — Terraform that installs ArgoCD (the `argocd` namespace + the
+  `argo-cd` Helm chart); the root Application and outputs are still TODO.
 - `gitops/` — stub directories `addons/` and `applications/` for ArgoCD-managed manifests.
 - CI: `pre-commit` → `deploy-infrastructure` (dry-run → manual approval → apply).
 
@@ -28,9 +29,14 @@ bootstrap installs ArgoCD, and ArgoCD deploys the cluster addons and application
 - The module **exposes no variable for custom K3s flags** — `K3S_EXEC` is hardcoded.
 - The module outputs node IPs, the control-plane endpoint and the cluster token, but
   **no kubeconfig**.
-- NOTE: `infrastructure/main.tf` has an uncommitted change
-  `use_public_ipv4 = true` (the comment next to it says public IPs are not needed).
-  Decision needed: keep it, or go back to `false` and rely on Tailscale.
+- Public IPv4 enabled with inbound restricted to Tailscale (`100.64.0.0/10`);
+  `use_public_ipv6 = false`. Outbound internet works for bootstrap (Tailscale
+  install/join), but no inbound from public internet. Access goes over the tailnet
+  (`master-node-0`, `worker-node-0`). The `*_public_ips` outputs will be non-empty.
+- `infrastructure/main.tf` does **not** set `extra_tls_sans` yet. Without it a
+  kubeconfig pointed at a `master-node-0.<tailnet>.ts.net` address fails TLS
+  verification. Adding it changes cloud-init `user_data` and therefore
+  recreates the servers.
 
 ### Conclusion
 What is missing is (a) a decision on **how traffic enters the cluster**, and
@@ -94,10 +100,10 @@ Steps:
 2. `bootstrap/` Terraform runs and installs ArgoCD + the root app-of-apps.
 3. ArgoCD reconciles `gitops/addons` and `gitops/applications`.
 
-- [ ] Decide how `bootstrap/` Terraform obtains cluster access (the module has **no kubeconfig
-      output**): e.g. build the kubeconfig from `control_plane_endpoint` + `cluster_token` +
-      the server CA read over Tailscale SSH, or fetch `/etc/rancher/k3s/k3s.yaml` from the master.
-- [ ] Choose the provider: `helm` for the ArgoCD release and `kubernetes`/`kubectl` for the root app.
+- [x] Decide how `bootstrap/` Terraform obtains cluster access: the kubeconfig is copied
+      over Tailscale (`scp cluster@master-node-0:/etc/rancher/k3s/k3s.yaml`) into
+      `bootstrap/kube-config/config` and read via `config_path`. Needs `extra_tls_sans`.
+- [x] Choose the provider: `helm` for the ArgoCD release and `kubernetes` for the root app.
 - [ ] Give `bootstrap/` its own state key in the S3 backend.
 - [ ] Add the root Application (app-of-apps) pointing at `gitops/`.
 - [ ] Define addon ordering via **sync waves**: `argocd.argoproj.io/sync-wave` (e.g. cert-manager before ingress).
@@ -131,7 +137,7 @@ later **selected apps on a public domain**.
 ### Now: klipper + Tailscale Operator
 - [ ] Ingress controller (Service `type=LoadBalancer`) → served by klipper (node IP:443).
 - [ ] **Tailscale Kubernetes Operator** — expose ingresses/services directly on the tailnet,
-      zero cost, no public IPs. Fits the "private cluster" philosophy.
+      zero cost, no public inbound exposure. Fits the "private cluster" philosophy.
 - Caveat: klipper + a `LoadBalancer` Service on port 80 → **the firewall blocks 80**.
       Only 443 works (or add a rule for 80 in the module: `custom_*_firewall_rules`).
 
@@ -204,7 +210,9 @@ Each of the above becomes a directory under `gitops/addons/<name>/`.
 
 ## 9. Open questions / decisions
 
-- [ ] `use_public_ipv4 = true` vs `false` (Tailscale-only) — the current uncommitted change.
+- [x] Public IPv4 enabled with Tailscale-only inbound firewall — decided.
+- [ ] Set `extra_tls_sans` in `main.tf` to the master's tailnet name so `kubectl`
+      works over Tailscale (this recreates the servers).
 - [ ] How `bootstrap/` Terraform gets cluster credentials (no kubeconfig in the module outputs).
 - [ ] `helm` + `kubernetes` providers vs the `kubectl` provider for the ArgoCD install.
 - [ ] Open `80` in the firewall (if ingress should accept HTTP / redirect to HTTPS).
