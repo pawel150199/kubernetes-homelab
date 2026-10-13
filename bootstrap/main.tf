@@ -1,4 +1,25 @@
-# TODO: add ArgoCD installation
+# Tailscale bootstrap configuration
+resource "kubernetes_namespace_v1" "tailscale" {
+  metadata {
+    name = "tailscale"
+    labels = {
+      application = "tailscale"
+    }
+  }
+}
+
+resource "helm_release" "tailscale" {
+  name       = "tailscale"
+  repository = "https://pkgs.tailscale.com/helmcharts/"
+  chart      = "tailscale-operator"
+  namespace  = kubernetes_namespace_v1.tailscale.metadata[0].name
+  version    = "0.1.0"
+  values = [
+    file("${path.module}/values/tailscale.yaml")
+  ]
+}
+
+# Argocd bootstrap configuration
 resource "kubernetes_namespace_v1" "argocd" {
   metadata {
     name = "argocd"
