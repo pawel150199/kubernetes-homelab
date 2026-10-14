@@ -63,7 +63,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with: ${{ github.event.workflow_run.head_sha | github.ref }}
+        with: 
+          ref:${{ github.event.workflow_run.head_sha | github.ref }}
 
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v4
