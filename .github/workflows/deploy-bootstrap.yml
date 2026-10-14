@@ -64,25 +64,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with: ${{ github.event.workflow_run.head_sha | github.ref }}
-      
+
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v4
-      
+
       - name: Verify terraform installation
         run: |
           terraform -help
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           aws-region: eu-central-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
+
       - name: Verify AWS connection
         run: |
           aws sts get-caller-identity
-      
+
       - name: Dry-run Deploy Homelab Bootstrap Cluster
         run: |
           cd bootstrap
@@ -92,7 +92,7 @@ jobs:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
           TF_VAR_tailscale_oauth_client_id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           TF_VAR_tailscale_oauth_client_secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
-      
+
       - name: Upload plan
         uses: actions/upload-artifact@v7
         with:
@@ -161,6 +161,3 @@ jobs:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
           TF_VAR_tailscale_oauth_client_id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           TF_VAR_tailscale_oauth_client_secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
-
-
-
