@@ -14,7 +14,9 @@ bootstrap installs ArgoCD, and ArgoCD deploys the cluster addons and application
 - 1 master + 1 worker (`cx23`, `ubuntu-26.04`, `hel1`), placement group, private network.
 - Tailscale on the nodes (`--ssh`), S3 state backend, CI on GitHub Actions.
 - `bootstrap/` — Terraform that installs ArgoCD (the `argocd` namespace + the
-  `argo-cd` Helm chart); the root Application and outputs are still TODO.
+  `argo-cd` Helm chart) and the Tailscale Kubernetes Operator (the `tailscale`
+  namespace + the `tailscale-operator` chart, authenticated by a Tailscale OAuth
+  client); the root Application and outputs are still TODO.
 - `gitops/` — stub directories `addons/` and `applications/` for ArgoCD-managed manifests.
 - CI: `pre-commit` → `deploy-infrastructure` (dry-run → manual approval → apply).
 
@@ -97,8 +99,15 @@ The bootstrap is done **by Terraform**, not by hand with `kubectl`/`helm`:
 
 Steps:
 1. `infrastructure/` Terraform creates the cluster.
-2. `bootstrap/` Terraform runs and installs ArgoCD + the root app-of-apps.
+2. `bootstrap/` Terraform runs and installs ArgoCD + the Tailscale operator + the root app-of-apps.
 3. ArgoCD reconciles `gitops/addons` and `gitops/applications`.
+
+The Tailscale operator is configured with an **OAuth client**, distinct from the
+`tailscale_auth_key` the nodes use to join the tailnet. Before applying
+`bootstrap/`, export `TF_VAR_tailscale_oauth_client_id` and
+`TF_VAR_tailscale_oauth_client_secret` (or set `tailscale_oauth_client_id` /
+`tailscale_oauth_client_secret` in a `terraform.tfvars`). Both are required — the
+`check` blocks in `bootstrap/main.tf` fail the plan when either is empty.
 
 - [x] Decide how `bootstrap/` Terraform obtains cluster access: the kubeconfig is copied
       over Tailscale (`scp cluster@master-node-0:/etc/rancher/k3s/k3s.yaml`) into
@@ -138,6 +147,9 @@ later **selected apps on a public domain**.
 - [ ] Ingress controller (Service `type=LoadBalancer`) → served by klipper (node IP:443).
 - [ ] **Tailscale Kubernetes Operator** — expose ingresses/services directly on the tailnet,
       zero cost, no public inbound exposure. Fits the "private cluster" philosophy.
+      (Currently installed directly by `bootstrap/` with the `tailscale-operator` chart
+      and a Tailscale OAuth client — see [§3](#3-argocd-bootstrap-via-terraform-l1) —
+      rather than by ArgoCD as an addon.)
 - Caveat: klipper + a `LoadBalancer` Service on port 80 → **the firewall blocks 80**.
       Only 443 works (or add a rule for 80 in the module: `custom_*_firewall_rules`).
 

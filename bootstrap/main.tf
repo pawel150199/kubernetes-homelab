@@ -8,14 +8,46 @@ resource "kubernetes_namespace_v1" "tailscale" {
   }
 }
 
+# Two variables are required to be set in the terraform.tfvars file or using environment variables:
+# TF_VAR_tailscale_oauth_client_id and TF_VAR_tailscale_oauth_client_secret
+
+# Check if the required variables are set
+
+# tailscale oauth client ID 
+check "tailscale_oauth_client_id" {
+  assert {
+    condition     = var.tailscale_oauth_client_id != ""
+    error_message = "tailscale_oauth_client_id is required. Please set it in terraform.tfvars or as an environment variable."
+  }
+}
+
+# tailscale oauth client secret
+check "tailscale_oauth_client_secret" {
+  assert {
+    condition     = var.tailscale_oauth_client_secret != ""
+    error_message = "tailscale_oauth_client_secret is required. Please set it in terraform.tfvars or as an environment variable." 
+  }
+}
+
+# Tailscale helm chart installation
 resource "helm_release" "tailscale" {
   name       = "tailscale"
   repository = "https://pkgs.tailscale.com/helmcharts/"
   chart      = "tailscale-operator"
   namespace  = kubernetes_namespace_v1.tailscale.metadata[0].name
-  version    = "0.1.0"
-  values = [
-    file("${path.module}/values/tailscale.yaml")
+  version    = "1.104.1"
+  set = [
+    {
+      name  = "oauth.clientId"
+      value = var.tailscale_oauth_client_id
+    },
+    {
+      name  = "oauth.clientSecret"
+      value = var.tailscale_oauth_client_secret
+    }
+  ]
+  depends_on = [
+    kubernetes_namespace_v1.tailscale
   ]
 }
 

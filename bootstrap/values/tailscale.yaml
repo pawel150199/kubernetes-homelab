@@ -1,4 +1,0 @@
-# TODO: add tailscale values to configure tailscale network in the cluster
-oauth:
-  client_id: "xxxxx"
-  client_secret: "xxxxx"
