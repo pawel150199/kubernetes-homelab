@@ -13,7 +13,7 @@ resource "kubernetes_namespace_v1" "tailscale" {
 
 # Check if the required variables are set
 
-# tailscale oauth client ID
+# Tailscale oauth client ID
 check "tailscale_oauth_client_id" {
   assert {
     condition     = var.tailscale_oauth_client_id != ""
@@ -21,7 +21,7 @@ check "tailscale_oauth_client_id" {
   }
 }
 
-# tailscale oauth client secret
+# Tailscale oauth client secret
 check "tailscale_oauth_client_secret" {
   assert {
     condition     = var.tailscale_oauth_client_secret != ""
