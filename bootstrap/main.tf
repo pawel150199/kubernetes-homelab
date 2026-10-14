@@ -13,7 +13,7 @@ resource "kubernetes_namespace_v1" "tailscale" {
 
 # Check if the required variables are set
 
-# tailscale oauth client ID 
+# tailscale oauth client ID
 check "tailscale_oauth_client_id" {
   assert {
     condition     = var.tailscale_oauth_client_id != ""
@@ -25,7 +25,7 @@ check "tailscale_oauth_client_id" {
 check "tailscale_oauth_client_secret" {
   assert {
     condition     = var.tailscale_oauth_client_secret != ""
-    error_message = "tailscale_oauth_client_secret is required. Please set it in terraform.tfvars or as an environment variable." 
+    error_message = "tailscale_oauth_client_secret is required. Please set it in terraform.tfvars or as an environment variable."
   }
 }
 
