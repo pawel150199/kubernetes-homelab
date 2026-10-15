@@ -93,7 +93,7 @@ jobs:
 
       - name: Setup kube config
         run: |
-          mkdir -p ./boostrap/.kube
+          mkdir -p ./bootstrap/.kube
           echo "${{ secrets.KUBE_CONFIG }}" >> ./bootstrap/.kube/config
 
       - name: Dry-run Deploy Homelab Bootstrap Cluster
@@ -174,7 +174,7 @@ jobs:
 
       - name: Setup kube config
         run: |
-          mkdir -p ./boostrap/.kube
+          mkdir -p ./bootstrap/.kube
           echo "${{ secrets.KUBE_CONFIG }}" >> ./bootstrap/.kube/config
 
       - name: Deploy Homelab Bootstrap Cluster
