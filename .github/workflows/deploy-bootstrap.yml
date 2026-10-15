@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  check_changes:
+  check-changes:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     outputs:
@@ -58,7 +58,7 @@ jobs:
   dry-run-deploy:
     runs-on: ubuntu-latest
     environment: homelab
-    needs: check_changes
+    needs: check-changes
     if: ${{ needs.check-changes.outputs.bootstrap == 'true' }}
     steps:
       - name: Checkout repository
