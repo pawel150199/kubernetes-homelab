@@ -64,7 +64,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          ref:${{ github.event.workflow_run.head_sha | github.ref }}
+          ref: ${{ github.event.workflow_run.head_sha | github.ref }}
+
+      - name: Tailscale setup
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.CI_TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.CI_TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
 
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v4
@@ -83,6 +90,10 @@ jobs:
       - name: Verify AWS connection
         run: |
           aws sts get-caller-identity
+
+      - name: Setup kube config
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" >> bootstrap/.kube/config
 
       - name: Dry-run Deploy Homelab Bootstrap Cluster
         run: |
@@ -129,6 +140,13 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
+      - name: Tailscale setup
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.CI_TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.CI_TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+
       - name: Set up terraform
         uses: hashicorp/setup-terraform@v4
 
@@ -152,6 +170,10 @@ jobs:
         with:
           name: tfplan
           path: bootstrap
+
+      - name: Setup kube config
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" >> bootstrap/.kube/config
 
       - name: Deploy Homelab Bootstrap Cluster
         run: |
