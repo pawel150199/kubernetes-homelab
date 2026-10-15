@@ -1,4 +1,6 @@
 # Tailscale bootstrap configuration
+#
+# See README.md for required variables (operator OAuth client) and CI secrets.
 resource "kubernetes_namespace_v1" "tailscale" {
   metadata {
     name = "tailscale"
@@ -10,6 +12,7 @@ resource "kubernetes_namespace_v1" "tailscale" {
 
 # Two variables are required to be set in the terraform.tfvars file or using environment variables:
 # TF_VAR_tailscale_oauth_client_id and TF_VAR_tailscale_oauth_client_secret
+# In CI, these are provided via TAILSCALE_OAUTH_CLIENT_ID/SECRET secrets mapped to TF_VAR_* env vars.
 
 # Check if the required variables are set
 
