@@ -58,7 +58,7 @@ jobs:
   dry-run-deploy:
     runs-on: ubuntu-latest
     environment: homelab
-    needs: check-changes
+    needs: check_changes
     if: ${{ needs.check-changes.outputs.bootstrap == 'true' }}
     steps:
       - name: Checkout repository
