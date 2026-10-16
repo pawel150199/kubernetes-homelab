@@ -7,9 +7,10 @@ metrics:
 serviceMonitor:
   enabled: true
 
-ingress:
-  annotations:
-    tailscale.com/expose: "true"
+server:
+  ingress:
+    annotations:
+      tailscale.com/expose: "true"
 
 server:
   autoscaling:
