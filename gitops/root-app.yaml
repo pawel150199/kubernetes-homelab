@@ -1,0 +1,48 @@
+# Root Application which monitor all applications
+apiVersion: argoproj.io/v1alpha
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argocdproj.io
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/pawel150199/kubernetes-homelab.git
+    targetRevision: master
+    path: gitops/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+
+# Root Application which monitor all applications
+apiVersion: argoproj.io/v1alpha
+kind: Application
+metadata:
+  name: addons
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argocdproj.io
+spec:
+  project: addons
+  source:
+    repoURL: https://github.com/pawel150199/kubernetes-homelab.git
+    targetRevision: master
+    path: gitops/addons
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

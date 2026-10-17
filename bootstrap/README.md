@@ -2,15 +2,14 @@
 
 Terraform that installs [Argo CD](https://argo-cd.readthedocs.io/) and the
 [Tailscale Kubernetes Operator](https://tailscale.com/kb/1236/kubernetes-operator)
-into the Kubernetes homelab cluster. This is the L1 layer: `../infrastructure`
-provisions the cloud + k3s cluster, and `bootstrap/` installs Argo CD, the
-Tailscale operator and (once finished) the root Application that points at
-[`../gitops`](../gitops). From then on Argo CD reconciles everything inside the
+into the Kubernetes homelab cluster. The `../infrastructure`
+provisions the cloud + k3s cluster, and `bootstrap/` installs Argo CD and 
+Tailscale operator. In the `../gitops` directory. From then on Argo CD reconciles everything inside the
 cluster from Git.
 
 CI deployment is handled by `.github/workflows/deploy-bootstrap.yml` (uses
 Tailscale OAuth for the runner, writes kubeconfig from `KUBE_CONFIG` secret,
-and passes operator OAuth credentials via `TAILSCALE_OAUTH_CLIENT_ID`/secret).
+and passes operator OAuth credentials via `TAILSCALE_OAUTH_CLIENT_ID` secret).
 
 ## What it does
 
@@ -23,30 +22,12 @@ and passes operator OAuth credentials via `TAILSCALE_OAUTH_CLIENT_ID`/secret).
   (`1.104.1`), configured with a **Tailscale OAuth client** so the operator can
   provision the proxy nodes and expose Services/Ingresses on the tailnet.
 
-The root Application (app-of-apps) that hands Argo CD the contents of
-`../gitops` is still marked `TODO` in `main.tf`/`outputs.tf`. For CI secrets
-and environment setup, see `CI.md`.
+The argocd UI is available using the address in the tailscale network.
+It have to be read from tailscale managment console. Then type correct address in browser (remember you have to be in tailscale network). Then you will have to autorise using credentials and managing your's app will be available.
 
-## Prerequisites
+### Kube Config
 
-- The cluster from `../infrastructure` is up and reachable over the tailnet.
-- A kubeconfig is available at `bootstrap/.kube/config` — both the `helm`
-  and `kubernetes` providers read it through `config_path` in `versions.tf`.
-- A Tailscale **OAuth client** for the Tailscale operator: its client ID and
-  client secret are passed to `helm_release.tailscale`. Create it in the
-  Tailscale admin console under **Settings → OAuth clients** with write access to
-  the tailnet's devices and the tag its proxy nodes should carry. See the
-  [Tailscale Kubernetes operator docs](https://tailscale.com/kb/1236/kubernetes-operator).
-- A Tailscale **OAuth client** for CI (GitHub Actions) to connect the runner to
-  the tailnet during bootstrap deployments (`tailscale/github-action` uses it).
-  This is separate from the operator OAuth client and the node auth key.
-- AWS credentials for the S3 backend (key `terraform-bootstrap.tfstate`, bucket
-  `kubernetes-homelab-tfstate`).
-
-### Drop in the kubeconfig
-
-The nodes have no public IP addresses, so the kubeconfig is copied over
-Tailscale from the master and repointed at its tailnet name:
+Copy the kubeconfig using tailscale network (accessing the nodes using public IP can be not possible due the narrow firewall configured).
 
 ```bash
 scp cluster@master-node-0:/etc/rancher/k3s/k3s.yaml bootstrap/kube-config/config
@@ -54,17 +35,6 @@ sed -i '' "s/127.0.0.1/master-node-0.<tailnet>.ts.net/" bootstrap/kube-config/co
 
 kubectl --kubeconfig bootstrap/kube-config/config get nodes
 ```
-
-> **The address must be on the API server certificate.** `extra_tls_sans` in
-> `../infrastructure/main.tf` has to name the same address before the cluster is
-> created, or `kubectl` (and therefore Terraform) fails the TLS handshake. See
-> [Connect to the Kubernetes cluster](../infrastructure/README.md#connect-to-the-kubernetes-cluster).
-
-> **`kube-config/` is not committed** — it contains cluster admin credentials and
-> should live only on the machine that runs the bootstrap.
-> **`bootstrap/.kube/config`** is also written by CI from the `KUBE_CONFIG`
-> secret. Ensure the kubeconfig points to the Tailscale-reachable API endpoint
-> (not `127.0.0.1`).
 
 ## How to run
 
@@ -127,15 +97,4 @@ terraform plan
 terraform apply
 ```
 
-Access the Argo CD UI by port-forwarding (the cluster has no ingress yet):
-
-```bash
-kubectl --kubeconfig kube-config/config -n argocd port-forward svc/argocd-server 8080:443
-```
-
-The initial admin password is stored in the `argocd-initial-admin-secret`:
-
-```bash
-kubectl --kubeconfig kube-config/config -n argocd get secret argocd-initial-admin-secret \
-  -o jsonpath='{.data.password}' | base64 -d
-```
+Access the Argo CD UI is possible using the tailscale Magic DNS or private IP.

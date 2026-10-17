@@ -8,11 +8,9 @@ serviceMonitor:
   enabled: true
 
 server:
-  ingress:
+  service:
     annotations:
       tailscale.com/expose: "true"
-
-server:
   autoscaling:
     enabled: true
     minReplicas: 1

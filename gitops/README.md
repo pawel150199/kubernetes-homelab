@@ -8,9 +8,14 @@ single source of truth for the cluster.
 
 Two directories exist:
 
-- `addons/` — cluster addons managed by Argo CD, one subdirectory per addon
-  (cert-manager, ingress, monitoring, secrets, storage, …).
-- `applications/` — your own workloads, one subdirectory per application.
+- `addons/` — cluster addons managed by Argo CD. Current state: `Application` CR definitions
+  for addons are placed here (see `root-app.yaml` below).
+- `apps/` (or `applications/` historically) — your own workloads, one subdirectory per application.
+
+A single root Application (`root-app.yaml`) bootstraps Argo CD to manage
+applications from Git using the App-of-Apps pattern.
+
+See also: [Tworzenie aplikacji w ArgoCD](../docs/argocd/tworzenie-aplikacji-w-argocd.md).
 
 The planned addon set and the intended sync order (secrets → cert-manager →
 ingress → observability) are described in [`../TODO.md`](../TODO.md).
