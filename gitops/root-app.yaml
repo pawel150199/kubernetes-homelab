@@ -1,13 +1,13 @@
 # Root Application which monitor all applications
-apiVersion: argoproj.io/v1alpha
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: apps
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argocdproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: apps
+  project: default
   source:
     repoURL: https://github.com/pawel150199/kubernetes-homelab.git
     targetRevision: master
@@ -24,15 +24,15 @@ spec:
 ---
 
 # Root Application which monitor all applications
-apiVersion: argoproj.io/v1alpha
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: addons
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argocdproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: addons
+  project: default
   source:
     repoURL: https://github.com/pawel150199/kubernetes-homelab.git
     targetRevision: master
