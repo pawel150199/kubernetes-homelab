@@ -3,7 +3,7 @@
 Terraform that installs [Argo CD](https://argo-cd.readthedocs.io/) and the
 [Tailscale Kubernetes Operator](https://tailscale.com/kb/1236/kubernetes-operator)
 into the Kubernetes homelab cluster. The `../infrastructure`
-provisions the cloud + k3s cluster, and `bootstrap/` installs Argo CD and 
+provisions the cloud + k3s cluster, and `bootstrap/` installs Argo CD and
 Tailscale operator. In the `../gitops` directory. From then on Argo CD reconciles everything inside the
 cluster from Git.
 
