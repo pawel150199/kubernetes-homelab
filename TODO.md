@@ -188,6 +188,10 @@ Decision: **defer for now**, but the direction is **option 1 = Sealed Secrets**.
 - [ ] (later) Sealed Secrets: a `SealedSecret` is a plain YAML, encrypt with `kubeseal`, commit to git.
 - Future alternatives: External Secrets Operator + 1Password/Bitwarden/Vault (cleaner, more config);
   SOPS + age (needs a CMP sidecar in ArgoCD — ksops/viaduct).
+- [ ] **A Secret Operator (Sealed Secrets) is also needed by the hcloud addons**: `hcloud-cloud-controller-manager`
+      and `hcloud-csi` read the API token from the `hcloud` Secret in `kube-system`. For now it is created
+      by hand (`kubectl -n kube-system create secret generic hcloud --from-literal=token=...` — see
+      `gitops/addons/README.md`); once Sealed Secrets is deployed, it should live in Git as a `SealedSecret`.
 
 ---
 

@@ -1,4 +1,4 @@
-# Root Application which monitor all applications
+# App-of-Apps for user applications
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -22,8 +22,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
 ---
-
-# Root Application which monitor all applications
+# App-of-Apps for cluster addons
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
