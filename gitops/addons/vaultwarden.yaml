@@ -8,4 +8,22 @@ metadata:
   labels:
     name: hcloud-csi
 spec:
-  project
+  project: vaultwarden
+  source:
+    repoURL: https://guerzon.github.io/vaultwarden
+    chart: vaultwarden
+    targetRevision: 1.37.4
+    helm:
+      release-name: vaultwarden
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+  revisionHistoryLimit: 10
