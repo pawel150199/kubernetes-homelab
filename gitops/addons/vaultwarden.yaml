@@ -15,9 +15,14 @@ spec:
     targetRevision: 1.37.4
     helm:
       release-name: vaultwarden
+    values: |-
+      data:
+        name: "vaultwarden-data"
+        size: "5Gi"
+        class: "hcloud-volumes"
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: namespace
   syncPolicy:
     automated:
       enabled: true
