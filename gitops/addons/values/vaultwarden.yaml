@@ -1,0 +1,7 @@
+storage:
+  data:
+    name: "vaultwarden-data"
+    size: "5Gi"
+    class: "hcloud-volumes"
+    accessMode: "ReadWriteOnce"
+    keepPvc: false
