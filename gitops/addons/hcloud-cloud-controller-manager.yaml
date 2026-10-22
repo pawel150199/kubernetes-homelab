@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://charts.hetzner.cloud
     chart: hcloud-cloud-controller-manager
-    targetRevision: 1.30.3
+    targetRevision: 1.39.1
     helm:
       releaseName: hcloud-cloud-controller-manager
       values: |-
