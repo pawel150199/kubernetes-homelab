@@ -8,7 +8,7 @@ metadata:
   labels:
     name: hcloud-csi
 spec:
-  project: default
+  project: addons
   source:
     repoURL: https://charts.hetzner.cloud
     chart: hcloud-csi
@@ -24,6 +24,4 @@ spec:
       prune: true
       selfHeal: true
       allowEmpty: false
-    syncOptions:
-      - CreateNamespace=true
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 5

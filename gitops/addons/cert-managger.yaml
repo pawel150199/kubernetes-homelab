@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+  namespace: argocd
+  finaliers:
+    - resources-finalier-argocd.argoproj.io
+spec:
+  project: addons
+  sources:
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targgetRevision: 1.21.3
+      helm:
+        releaseName: cert-manager
+        valueFiles:
+          - $values/gitops/addons/values/cert-manager.yaml
+    - repoURL: https://github.com/pawel150199/kubernetes-homelab.git
+      targetRevision: master
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+  revisionHistoryLimit: 5

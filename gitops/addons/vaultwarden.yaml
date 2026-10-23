@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: addons
   sources:
     - repoURL: https://guerzon.github.io/vaultwarden
       chart: vaultwarden
@@ -29,4 +29,4 @@ spec:
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 5
