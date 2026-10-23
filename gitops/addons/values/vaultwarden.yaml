@@ -5,3 +5,6 @@ storage:
     class: "hcloud-volumes"
     accessMode: "ReadWriteOnce"
     keepPvc: false
+service:
+  annotations:
+    tailscale.com/expose: "true"
