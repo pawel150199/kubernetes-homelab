@@ -6,7 +6,7 @@ metadata:
   finaliers:
     - resources-finalier-argocd.argoproj.io
 spec:
-  project: addons
+  project: default
   sources:
     - repoURL: https://charts.jetstack.io
       chart: cert-manager

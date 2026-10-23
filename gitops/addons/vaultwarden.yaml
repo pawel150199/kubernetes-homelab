@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: addons
+  project: default
   sources:
     - repoURL: https://guerzon.github.io/vaultwarden
       chart: vaultwarden
