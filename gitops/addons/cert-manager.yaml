@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: metrics-server
+  name: cert-manager
   namespace: argocd
   finaliers:
     - resources-finalier-argocd.argoproj.io
