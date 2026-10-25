@@ -33,8 +33,8 @@ Grafana obecnie promuje podejście oparte o **OpenTelemetry** + **Grafana Alloy*
 ## 3) Architektura przepływu danych
 
 ```text
-[Pods/Nodes] 
-  -> Grafana Alloy (DaemonSet) 
+[Pods/Nodes]
+  -> Grafana Alloy (DaemonSet)
      - logi (pod logs via k8s API/file) -> Loki
      - metryki (kubelet/cadvisor/node/kube-state) -> Prometheus (kube-prometheus-stack)
      - traces (OTLP gRPC/HTTP) -> Tempo
@@ -598,6 +598,6 @@ Wykonuj kolejno, sprawdzając status w ArgoCD/UI lub `kubectl`.
 
 ## Podpowiedź przed startem
 
-Zacznij **minimalnie**: tylko `kube-prometheus-stack` (metryki + Grafana). Gdy będzie stabilny, dodaj `loki` + `alloy`, na końcu `tempo`. Dzięki temu szybciej wyłapiesz problemy (CRD, zasoby, PVC) bez wdrożenia całego stosu naraz. 
+Zacznij **minimalnie**: tylko `kube-prometheus-stack` (metryki + Grafana). Gdy będzie stabilny, dodaj `loki` + `alloy`, na końcu `tempo`. Dzięki temu szybciej wyłapiesz problemy (CRD, zasoby, PVC) bez wdrożenia całego stosu naraz.
 
 To rozwiązanie jest zgodne z aktualnym kierunkiem Grafany (Alloy + LGTM) i idealnie wpisuje się w Twój model GitOps przez ArgoCD.
