@@ -3,6 +3,9 @@ grafana:
   adminUser: admin
   service:
     type: ClusterIP
+    annotations:
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: "grafana"
   persistence:
     enabled: false
   sidecar:
