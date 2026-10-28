@@ -3,6 +3,15 @@ grafana:
   adminUser: admin
   service:
     type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: tailscale
+    hosts:
+      - grafana
+    path: /
+    tls:
+      - hosts:
+          - grafana
   persistence:
     enabled: false
   sidecar:
