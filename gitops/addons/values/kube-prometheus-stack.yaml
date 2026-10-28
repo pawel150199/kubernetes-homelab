@@ -25,7 +25,7 @@ grafana:
 prometheus:
   prometheusSpec:
     additionalArgs:
-      - name: web.enable-remote-write-receiver 
+      - name: web.enable-remote-write-receiver
     retention: 7d
     retentionSize: "10GB"
     resources:
