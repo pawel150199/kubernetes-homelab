@@ -551,22 +551,39 @@ spec:
 
 ## Grafana Access
 
-You already have the pattern from ArgoCD - just add Tailscale annotations to the Grafana service.
-
-Option A - via `values` in `kube-prometheus-stack.yaml`:
+Grafana is an HTTP service on port 80. The `tailscale.com/expose` Service annotation creates an L3 proxy that
+preserves ports, so it works for services that already serve TLS on the port clients use (for example
+`argocd-server` on 443). For Grafana, use a Tailscale **Ingress** instead: it terminates TLS on 443 and proxies
+HTTP to the Grafana Service on port 80.
 
 ```yaml
 grafana:
-  service:
-    type: ClusterIP
-    annotations:
-      tailscale.com/expose: "true"
-      tailscale.com/hostname: "grafana"  # optional
+  ingress:
+    enabled: true
+    ingressClassName: tailscale
+    hosts:
+      - grafana
+    path: /
+    tls:
+      - hosts:
+          - grafana
 ```
 
-After sync the service will appear as `grafana.<tailnet>.ts.net` (or a hostname from the tailnet). HTTPS/TLS is handled by Tailscale.
+This requires **HTTPS Certificates** to be enabled for the tailnet (one-time setting):
+<https://login.tailscale.com/admin/dns> → **HTTPS Certificates** → **Enable HTTPS**.
 
-Option B - a separate `Service`/`Ingress` via the Tailscale operator. The annotation on the service is the simplest and consistent with what you already do (`argocd-server`).
+After sync, Grafana is available at `https://grafana.<tailnet>.ts.net` with a valid Tailscale-issued
+certificate, for example `https://grafana.tail692efe.ts.net`.
+
+Retrieve the generated admin password:
+
+```sh
+kubectl -n monitoring get secret kube-prometheus-stack-grafana \
+  -o jsonpath='{.data.admin-password}' | base64 -d; echo
+```
+
+`grafana.service.annotations` is supported, but `tailscale.com/expose` is only suitable for Services that
+already serve TLS on the exposed port. For HTTP backends, use the Ingress above.
 
 ##  Remarks
 
