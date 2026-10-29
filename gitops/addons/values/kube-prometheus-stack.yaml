@@ -1,6 +1,7 @@
 grafana:
   enabled: true
   adminUser: admin
+  defaultDashboardsTimezone: Europe/Warsaw
   service:
     type: ClusterIP
   ingress:
@@ -13,7 +14,9 @@ grafana:
       - hosts:
           - grafana
   persistence:
-    enabled: false
+    enabled: true
+    size: 5Gi
+    storageClassName: hcloud-volumes
   sidecar:
     dashboards:
       enabled: true
@@ -27,7 +30,7 @@ prometheus:
     additionalArgs:
       - name: web.enable-remote-write-receiver
     retention: 7d
-    retentionSize: "10GB"
+    retentionSize: "5GB"
     resources:
       requests:
         memory: 512Mi
@@ -42,7 +45,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 20Gi
+              storage: 5Gi
 
 alertmanager:
   enabled: true
