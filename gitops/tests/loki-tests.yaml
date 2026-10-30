@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-generator
+  labels:
+    app: log-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-generator
+  template:
+    metadata:
+      name: log-generator
+      labels:
+        app: log-generator
+    spec:
+      containers:
+        - name: log-generator
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "-c" ]
+          args:
+            - >
+              while true; do
+                ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ");
+                echo "{\"timestamp\":\"${ts}\",\"level\":\"info\",\"message\":\"Hello from log-generator! Testing Loki JSON logs.\"}";
+                sleep 5;
+              done
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memotu: 64Mi

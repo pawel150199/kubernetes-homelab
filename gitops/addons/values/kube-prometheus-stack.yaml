@@ -24,6 +24,11 @@ grafana:
     datasources:
       enabled: true
       defaultDatasourceEnabled: true
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki:3100
 
 prometheus:
   prometheusSpec:
