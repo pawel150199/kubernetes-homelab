@@ -1,0 +1,100 @@
+# Grafana Alloy
+# Chart: grafana/alloy 1.15.0 (Alloy v1.21.x)
+alloy:
+  configMap:
+    create: true
+    content: |-
+      // Discover pods and send their container logs to Loki.
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "node"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+          separator     = "/"
+          target_label  = "job"
+        }
+        // k3s/containerd layout:
+        // /var/log/pods/<namespace>_<pod>_<uid>/<container>/<n>.log
+        // $1 contains "<uid>/<container>" (source labels joined by separator).
+        rule {
+          source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+          separator     = "/"
+          target_label  = "__path__"
+          replacement   = "/var/log/pods/*$1/*.log"
+        }
+      }
+
+      local.file_match "pod_logs" {
+        path_targets = discovery.relabel.pod_logs.output
+      }
+
+      loki.source.file "pod_logs" {
+        targets    = local.file_match.pod_logs.targets
+        forward_to = [loki.write.loki.receiver]
+      }
+
+      loki.write "loki" {
+        endpoint {
+          url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+        }
+      }
+
+  # Persist read positions so a restart does not re-send old log lines.
+  storagePath: /var/lib/alloy
+
+  mounts:
+    # /var/log is needed to read /var/log/pods from the host.
+    varlog: true
+    dockercontainers: false
+    extra:
+      - name: alloy-data
+        mountPath: /var/lib/alloy
+
+  # Root is required to read the kubelet/containerd log files and to write
+  # the positions file on the host.
+  securityContext:
+    runAsUser: 0
+
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 200m
+
+controller:
+  type: daemonset
+  tolerations:
+    - operator: Exists
+  volumes:
+    extra:
+      - name: alloy-data
+        hostPath:
+          path: /var/lib/alloy
+          type: DirectoryOrCreate
+
+# Enable later with additionalLabels: {release: kube-prometheus-stack}
+# so the kube-prometheus-stack Prometheus picks it up.
+serviceMonitor:
+  enabled: false

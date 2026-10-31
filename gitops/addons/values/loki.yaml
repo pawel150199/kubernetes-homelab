@@ -1,56 +1,67 @@
+# Loki in SingleBinary mode for the homelab.
+# Chart: grafana/loki 7.5.0 (Loki 3.6.x)
+#
+# Pod logs are collected by Grafana Alloy (see values/alloy.yaml).
+deploymentMode: SingleBinary
+
 loki:
-  enabled: true
+  auth_enabled: false
+
+  commonConfig:
+    replication_factor: 1
+
+  storage:
+    type: filesystem
+
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  rulerConfig:
+    storage:
+      type: local
+      local:
+        directory: /etc/loki/rules
+
+  # Resolved via limits_config (Loki 3.x). table_manager is legacy and
+  # only works with the old boltdb-shipper schema.
+  limits_config:
+    retention_period: 64h
+
+  compactor:
+    retention_enabled: true
+    delete_request_store: filesystem
+
+singleBinary:
+  replicas: 1
   persistence:
     enabled: true
+    storageClass: hcloud-volumes
     size: 5Gi
-  config:
-    table_manager:
-      retention_deletes_enabled: true
-      retention_period: 168
+    # Do not delete the PVC together with the StatefulSet (an Argo CD prune
+    # or a re-sync must not wipe the log data).
+    enableStatefulSetAutoDeletePVC: false
+    whenDeleted: Retain
+    whenScaled: Retain
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 250m
 
-promtail:
+# Keep the nginx gateway: Grafana and Alloy push/query through it.
+# Service: loki-gateway.monitoring.svc.cluster.local
+gateway:
   enabled: true
-  serviceAccount:
-    create: true
-    name: promtail
-  config:
-    clients:
-      - url: http://loki:3100/loki/api/v1/push
-    positions:
-      filename: /tmp/positions.yaml
-  scrape_configs:
-    - job_name: kubernetes-pods
-      kubernetes_sd_configs:
-        - role: pod
 
-      pipeline_stages:
-        - docker: {} # decode Docker JSON logs (if using containerd/docker)
-
-      relabel_configs:
-        # Add namespace as a label
-        - source_labels: [__meta_kubernetes_namespace]
-          target_label: namespace
-
-        # Add pod name as a label
-        - source_labels: [__meta_kubernetes_pod_name]
-          target_label: pod
-
-        # Add container name as a label
-        - source_labels: [__meta_kubernetes_container_name]
-          target_label: container
-
-        # Keep Kubernetes pod labels as Promtail labels
-        - action: labelmap
-          regex: __meta_kubernetes_pod_label_(.+)
-
-        # Only keep pods that are running
-        - source_labels: [__meta_kubernetes_pod_container_status_running]
-          regex: true
-          action: keep
-
-        # Define the log file path
-        - source_labels:
-            - __meta_kubernetes_pod_uid
-            - __meta_kubernetes_container_name
-          target_label: __path__
-          replacement: /var/log/pods/*$1/*/*.log
+monitoring:
+  selfMonitoring:
+    enabled: true
