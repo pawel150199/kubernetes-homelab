@@ -16,7 +16,7 @@ spec:
     helm:
       releaseName: loki
   destination:
-    server: https:/kubernetes.default.svc
+    server: https://kubernetes.default.svc
     namespace: monitoring
   syncPolicy:
     automated:
