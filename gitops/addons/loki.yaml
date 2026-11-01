@@ -9,12 +9,17 @@ metadata:
     name: loki
 spec:
   project: default
-  source:
-    repoURL: https://grafana.github.io/helm-charts
-    chart: loki
-    targetRevision: 7.5.0
-    helm:
-      releaseName: loki
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki
+      targetRevision: 7.5.0
+      helm:
+        releaseName: loki
+        valueFiles:
+          - $values/gitops/addons/values/loki.yaml
+    - repoURL: https://github.com/pawel150199/kubernetes-homelab.git
+      targetRevision: master
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -24,4 +29,6 @@ spec:
       prune: true
       selfHeal: true
       allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
   revisionHistoryLimit: 5

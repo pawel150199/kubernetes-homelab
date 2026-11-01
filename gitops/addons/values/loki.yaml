@@ -12,6 +12,10 @@ loki:
 
   storage:
     type: filesystem
+    bucketNames:
+      chunks: loki-chunks
+      ruler: loki-ruler
+      admin: loki-admin
 
   schemaConfig:
     configs:
@@ -62,6 +66,12 @@ singleBinary:
 gateway:
   enabled: true
 
-monitoring:
-  selfMonitoring:
-    enabled: true
+# Single-node homelab: skip the extra memcached, canary and helm-test pods.
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+lokiCanary:
+  enabled: false
+test:
+  enabled: false
