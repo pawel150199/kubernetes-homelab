@@ -61,6 +61,29 @@ singleBinary:
       memory: 512Mi
       cpu: 250m
 
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+ingester:
+  replicas: 0
+distributor:
+  replicas: 0
+querier:
+  replicas: 0
+queryFrontend:
+  replicas: 0
+queryScheduler:
+  replicas: 0
+indexGateway:
+  replicas: 0
+ruler:
+  replicas: 0
+tableManager:
+  enabled: false
+
 # Keep the nginx gateway: Grafana and Alloy push/query through it.
 # Service: loki-gateway.monitoring.svc.cluster.local
 gateway:
