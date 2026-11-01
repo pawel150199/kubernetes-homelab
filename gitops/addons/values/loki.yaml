@@ -27,11 +27,17 @@ loki:
           prefix: loki_index_
           period: 24h
 
+  # The ruler is part of the SingleBinary target and always initialises its
+  # storage, even though this homelab does not ship any alerting rules.
+  # Do NOT point it at /etc/loki: that path is the read-only ConfigMap mount
+  # and Loki crashes with "mkdir /etc/loki/rules: read-only file system".
+  # /var/loki is the writable PVC and matches the chart's default
+  # common.storage.filesystem.rules_directory.
   rulerConfig:
     storage:
       type: local
       local:
-        directory: /etc/loki/rules
+        directory: /var/loki/rules
 
   # Resolved via limits_config (Loki 3.x). table_manager is legacy and
   # only works with the old boltdb-shipper schema.
@@ -98,3 +104,10 @@ lokiCanary:
   enabled: false
 test:
   enabled: false
+
+# No alerting rules are shipped, so drop the k8s-sidecar that watches
+# ConfigMaps/Secrets labelled loki_rule (it writes to an emptyDir the ruler
+# does not read from anyway).
+sidecar:
+  rules:
+    enabled: false
