@@ -94,7 +94,7 @@ controller:
           path: /var/lib/alloy
           type: DirectoryOrCreate
 
-# Enable later with additionalLabels: {release: kube-prometheus-stack}
-# so the kube-prometheus-stack Prometheus picks it up.
 serviceMonitor:
-  enabled: false
+  enabled: true
+  additionalLabels:
+    release: kube-prometheus-stack
