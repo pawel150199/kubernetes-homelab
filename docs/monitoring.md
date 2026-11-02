@@ -86,12 +86,16 @@ gitops/
 │   ├── loki.yaml                      # logs
 │   ├── tempo.yaml                     # tracing
 │   ├── alloy.yaml                     # collector (logs/metrics/traces)
+│   ├── monitoring-dashboards.yaml     # custom Grafana dashboards (ConfigMaps)
 │   └── values/
 │       ├── kube-prometheus-stack.yaml
 │       ├── loki.yaml
 │       ├── tempo.yaml
 │       ├── alloy.yaml
 │       └── ... (existing)
+├── dashboards/                        # raw dashboard JSON + kustomization
+│   ├── kustomization.yaml
+│   └── homelab-overview.json
 └── root-app.yaml                      # unchanged (addons/ is already tracked)
 ```
 
@@ -584,6 +588,93 @@ kubectl -n monitoring get secret kube-prometheus-stack-grafana \
 
 `grafana.service.annotations` is supported, but `tailscale.com/expose` is only suitable for Services that
 already serve TLS on the exposed port. For HTTP backends, use the Ingress above.
+
+## Custom Grafana dashboards
+
+Custom dashboards are not stored in the Helm values. They live as plain JSON files in
+`gitops/dashboards/` and are synced by a dedicated ArgoCD Application
+(`gitops/addons/monitoring-dashboards.yaml`). Kustomize wraps the listed JSON files into a
+ConfigMap labelled `grafana_dashboard: "1"`, which the Grafana sidecar picks up automatically
+(`sidecar.dashboards.searchNamespace: ALL` is already set in the values).
+
+Why a separate Application instead of just a subdirectory of `gitops/addons/`: the `addons`
+app-of-apps uses a plain directory source, which is **not recursive**, so it would ignore
+`gitops/addons/dashboards/`. A separate Application also keeps dashboard churn out of the
+Helm release's sync history.
+
+`gitops/dashboards/kustomization.yaml`:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+configMapGenerator:
+  - name: homelab-dashboards
+    files:
+      - homelab-overview.json
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"
+```
+
+`gitops/addons/monitoring-dashboards.yaml`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-dashboards
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/pawel150199/kubernetes-homelab.git
+    targetRevision: master
+    path: gitops/dashboards
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+  revisionHistoryLimit: 5
+```
+
+Adding a dashboard: export it from Grafana (**Share → Export → Save to file**) or download it
+from <https://grafana.com/grafana/dashboards/>, drop the `.json` into `gitops/dashboards/`, add
+the filename to `files` in `kustomization.yaml` (Kustomize does not expand globs), and push.
+The sidecar imports it within ~30s; no Grafana restart and no Helm upgrade.
+
+Labels and data source:
+
+- The ConfigMap must carry `grafana_dashboard: "1"` (the chart's default `labelValue`). The
+  `generatorOptions.labels` above applies it to every generated ConfigMap.
+- Panels should use the chart's default Prometheus data source UID `prometheus`:
+  `"datasource": {"type": "prometheus", "uid": "prometheus"}`.
+- Keep each dashboard's `uid` stable and leave `id` as `null` so updates are matched instead
+  of duplicated.
+
+Folders are enabled: the values set `sidecar.dashboards.folderAnnotation: grafana_folder` and
+`sidecar.dashboards.provider.foldersFromFilesStructure: true`, and
+`generatorOptions.annotations.grafana_folder: Homelab` puts the custom dashboards in the
+**Homelab** folder. Both values are required — the annotation only works when the provider is
+told to build folders from the sidecar's file structure.
+The chart's own dashboards are not annotated individually and stay in the default folder;
+to group them, set `sidecar.dashboards.annotations.grafana_folder: Kubernetes` in the values
+(kube-prometheus-stack applies that static map to all of its dashboard ConfigMaps).
+For per-dashboard folders, use a separate `configMapGenerator` entry with its own
+`options.annotations.grafana_folder`.
 
 ##  Remarks
 

@@ -2,6 +2,21 @@ grafana:
   enabled: true
   adminUser: admin
   defaultDashboardsTimezone: Europe/Warsaw
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  # Give Grafana time to load its bundled plugins on a slow node. Without a
+  # startup probe the liveness probe kills it while it is still starting.
+  startupProbe:
+    httpGet:
+      path: /api/health
+      port: grafana
+    failureThreshold: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
   service:
     type: ClusterIP
   ingress:
@@ -18,9 +33,23 @@ grafana:
     size: 5Gi
     storageClassName: hcloud-volumes
   sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
     dashboards:
       enabled: true
-      searchNamespace: ALL
+      searchNamespace: monitoring
+      label: grafana_dashboard
+      folder: /var/lib/grafana/dashboards
+      # Put each dashboard in the folder named by this ConfigMap annotation.
+      # Requires provider.foldersFromFilesStructure below so Grafana also
+      # creates the folders described by the sidecar's directory layout.
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
     datasources:
       enabled: true
       defaultDatasourceEnabled: true
@@ -55,6 +84,12 @@ prometheus:
 alertmanager:
   enabled: true
   alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
     storage:
       volumeClaimTemplate:
         spec:
@@ -67,8 +102,24 @@ alertmanager:
 nodeExporter:
   enabled: true
 
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
 kubeStateMetrics:
   enabled: true
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
 
 defaultRules:
   create: true

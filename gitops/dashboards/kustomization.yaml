@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The Grafana sidecar discovers dashboards cluster-wide
+# (grafana.sidecar.dashboards.searchNamespace=ALL), but keeping the ConfigMaps
+# next to Grafana keeps the monitoring namespace self-contained.
+namespace: monitoring
+
+# Each JSON file in this directory is added as one key in a single ConfigMap.
+# To add a dashboard: export it from Grafana (Share -> Export -> Save to file)
+# or download it from grafana.com, drop the .json here, and add it to `files`
+# below. ArgoCD syncs it and the sidecar picks it up within ~30s - no Grafana
+# restart.
+#
+# Kustomize does not expand globs in `files`, so new dashboards must be listed
+# explicitly.
+configMapGenerator:
+  - name: homelab-dashboards
+    files:
+      - homelab-overview.json
+
+generatorOptions:
+  # A name hash would create a brand-new ConfigMap on every dashboard change,
+  # leaving the previous copy for the sidecar to import until it is pruned.
+  # A stable name means the ConfigMap is updated in place instead.
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"
+  # Folder read by the sidecar (grafana.sidecar.dashboards.folderAnnotation).
+  # Every dashboard in this ConfigMap lands in this Grafana folder.
+  annotations:
+    grafana_folder: Homelab
