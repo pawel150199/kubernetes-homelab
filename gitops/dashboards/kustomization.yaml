@@ -18,7 +18,7 @@ configMapGenerator:
   - name: homelab-dashboards
     files:
       - homelab-overview.json
-      - loki-dashboard.json
+      #- loki-dashboard.json
 
 generatorOptions:
   # A name hash would create a brand-new ConfigMap on every dashboard change,
