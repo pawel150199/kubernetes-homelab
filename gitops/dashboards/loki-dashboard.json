@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_LOKI",
-      "label": "Loki",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "loki",
-      "pluginName": "Loki"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -31,7 +21,7 @@
     },
     {
       "type": "datasource",
-      "id": "loki",
+      "id": "Loki",
       "name": "Loki",
       "version": "1.0.0"
     },
@@ -76,7 +66,7 @@
       }
     ]
   },
-  "description": "Dashboard to explore logs per system",
+  "description": "Kubernetes container log dashboard using Loki labels (namespace, pod, container).",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": 12611,
@@ -88,9 +78,9 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
-      "description": "Total  Count of log lines in the specified time range",
+      "description": "Total number of log lines in the selected time range",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -157,22 +147,23 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
-          "expr": "sum(count_over_time(({instance=\"$instance\"})[$__interval]))",
+          "expr": "sum(count_over_time({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"}[$__range]))",
           "hide": false,
-          "refId": "A"
+          "refId": "A",
+          "queryType": "instant"
         }
       ],
-      "title": "Total  Count of logs",
+      "title": "Total log lines",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
-      "description": "Total Count: of $searchable_pattern in the specified time range",
+      "description": "Number of log lines matching the case-insensitive search pattern",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -239,20 +230,21 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
-          "expr": "sum(count_over_time(({instance=\"$instance\"} |~ \"(?i)$searchable_pattern\")[$__interval]))",
+          "expr": "sum(count_over_time(({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"} |~ \"(?i)$searchable_pattern\")[$__range]))",
           "hide": false,
-          "refId": "A"
+          "refId": "A",
+          "queryType": "instant"
         }
       ],
-      "title": "Total Count: of $searchable_pattern",
+      "title": "Matching log lines: \"$searchable_pattern\"",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
       "description": "Show log messages that match search pattern",
       "gridPos": {
@@ -276,9 +268,9 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
-          "expr": "{instance=\"$instance\"} |~ \"(?i)$searchable_pattern\" ",
+          "expr": "{namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"} |~ \"(?i)$searchable_pattern\"",
           "hide": false,
           "refId": "A"
         }
@@ -289,9 +281,9 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
-      "description": "Summarize log messages per file",
+      "description": "Distribution of log lines by Kubernetes container in the selected time range",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -379,25 +371,25 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time(({instance=\"$instance\"})[$__interval])) by (filename)",
+          "expr": "sum by (container) (count_over_time({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"}[$__range]))",
           "hide": false,
-          "legendFormat": "{{filename}}",
-          "queryType": "range",
+          "legendFormat": "{{container}}",
+          "queryType": "instant",
           "refId": "A"
         }
       ],
-      "title": "Total count of log messages",
+      "title": "Log lines by container",
       "type": "piechart"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
-      "description": "Summarize log files that match searchable pattern",
+      "description": "Distribution of matching log lines by Kubernetes container",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -455,24 +447,24 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"} |~ \"(?i)$searchable_pattern\")[$__interval])) by (filename)",
-          "legendFormat": "{{filename}}",
-          "queryType": "range",
+          "expr": "sum by (container) (count_over_time(({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"} |~ \"(?i)$searchable_pattern\")[$__range]))",
+          "legendFormat": "{{container}}",
+          "queryType": "instant",
           "refId": "A"
         }
       ],
-      "title": "Matched word: \"$searchable_pattern\"",
+      "title": "Matches of \"$searchable_pattern\" by container",
       "type": "piechart"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
-      "description": "Percentage of log messages that match searchable pattern",
+      "description": "Percentage of log lines matching the search pattern in the selected time range",
       "fieldConfig": {
         "defaults": {
           "mappings": [
@@ -537,22 +529,23 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
-          "expr": "sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"} |~ \"(?i)$searchable_pattern\")[$__interval])) * 100 / sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"})[$__interval]))",
+          "expr": "100 * sum(count_over_time(({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"} |~ \"(?i)$searchable_pattern\")[$__range])) / sum(count_over_time({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"}[$__range]))",
           "hide": false,
-          "refId": "A"
+          "refId": "A",
+          "queryType": "instant"
         }
       ],
-      "title": "\"$searchable_pattern\" Percentage for specified time",
+      "title": "Percentage matching \"$searchable_pattern\"",
       "type": "gauge"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "${DS_LOKI}"
+        "uid": "${loki_source}"
       },
-      "description": "",
+      "description": "Matching log lines over time, grouped by Kubernetes container",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -628,16 +621,16 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "${DS_LOKI}"
+            "uid": "${loki_source}"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"} |~ \"(?i)$searchable_pattern\")[$__interval])) by (filename)",
-          "legendFormat": "{{filename}}",
+          "expr": "sum by (container) (count_over_time(({namespace=~\"$namespace\", pod=~\"$pod\", container=~\"$container\"} |~ \"(?i)$searchable_pattern\")[$__interval]))",
+          "legendFormat": "{{container}}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Matched word: \"$searchable_pattern\" per log file",
+      "title": "Matches of \"$searchable_pattern\" over time",
       "type": "timeseries"
     }
   ],
@@ -672,48 +665,83 @@
         "type": "textbox"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".+"
+        },
         "datasource": {
           "type": "loki",
-          "uid": "${DS_LOKI}"
+          "uid": "${loki_source}"
         },
-        "definition": "label_values({instance=~\".+\"}, instance)",
-        "description": "\"instance\" is a log label to identify which server from which the log originated.",
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "instance",
-        "options": [],
-        "query": "label_values({instance=~\".+\"}, instance)",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "loki",
-          "uid": "${DS_LOKI}"
-        },
-        "definition": "label_values({filename=~\".+\"}, filename)",
-        "description": "Name of the log file",
+        "definition": "label_values({namespace=~\".+\"}, namespace)",
+        "description": "Kubernetes namespace label",
         "hide": 0,
         "includeAll": true,
+        "allValue": ".+",
         "multi": false,
-        "name": "filename",
+        "name": "namespace",
         "options": [],
-        "query": "label_values({filename=~\".+\"}, filename)",
+        "query": "label_values({namespace=~\".+\"}, namespace)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
+          "text": "All",
+          "value": ".+"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki_source}"
+        },
+        "definition": "label_values({namespace=~\"$namespace\", pod=~\".+\"}, pod)",
+        "description": "Kubernetes pod label, filtered by namespace",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "name": "pod",
+        "options": [],
+        "query": "label_values({namespace=~\"$namespace\", pod=~\".+\"}, pod)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".+"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "${loki_source}"
+        },
+        "definition": "label_values({namespace=~\"$namespace\", pod=~\"$pod\", container=~\".+\"}, container)",
+        "description": "Kubernetes container label, filtered by namespace and pod",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": ".+",
+        "multi": false,
+        "name": "container",
+        "options": [],
+        "query": "label_values({namespace=~\"$namespace\", pod=~\"$pod\", container=~\".+\"}, container)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
           "text": "Loki",
           "value": "Loki"
         },
@@ -727,7 +755,8 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "type": "datasource"
+        "type": "datasource",
+        "pluginId": "loki"
       }
     ]
   },
@@ -749,8 +778,8 @@
     ]
   },
   "timezone": "",
-  "title": "Loki log explorer",
+  "title": "Kubernetes Loki log explorer",
   "uid": "fRIvzUZMz",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
