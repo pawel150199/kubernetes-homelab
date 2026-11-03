@@ -7,13 +7,6 @@
       "type": "datasource",
       "pluginId": "loki",
       "pluginName": "Loki"
-    },
-    {
-      "name": "VAR_ALLOY_EXCLUDE",
-      "type": "constant",
-      "label": "alloy_exclude",
-      "value": "pattern_example",
-      "description": ""
     }
   ],
   "__elements": {},
@@ -28,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "12.3.1"
+      "version": "9.1.2"
     },
     {
       "type": "panel",
@@ -40,7 +33,7 @@
       "type": "datasource",
       "id": "loki",
       "name": "Loki",
-      "version": "12.3.1"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
@@ -66,40 +59,345 @@
       {
         "builtIn": 1,
         "datasource": {
-          "uid": "-- Grafana --"
+          "type": "datasource",
+          "uid": "grafana"
         },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
-  "description": "Universal and flexible dashboard for logging",
+  "description": "Dashboard to explore logs per system",
   "editable": true,
   "fiscalYearStartMonth": 0,
+  "gnetId": 12611,
   "graphTooltip": 0,
   "id": null,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "description": "Total  Count of log lines in the specified time range",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "rgb(31, 255, 7)",
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(31, 255, 7)",
+                "value": null
+              },
+              {
+                "color": "rgb(31, 255, 7)",
+                "value": 10
+              },
+              {
+                "color": "rgb(31, 255, 7)",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
       "gridPos": {
-        "h": 1,
-        "w": 24,
+        "h": 3,
+        "w": 12,
         "x": 0,
         "y": 0
       },
-      "id": 22,
-      "panels": [],
-      "title": "All services statistics",
-      "type": "row"
+      "id": 11,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "sum(count_over_time(({instance=\"$instance\"})[$__interval]))",
+          "hide": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Total  Count of logs",
+      "type": "stat"
     },
     {
       "datasource": {
+        "type": "loki",
         "uid": "${DS_LOKI}"
       },
+      "description": "Total Count: of $searchable_pattern in the specified time range",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "rgb(222, 15, 43)",
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(222, 15, 43)",
+                "value": null
+              },
+              {
+                "color": "rgb(222, 15, 43)",
+                "value": 10
+              },
+              {
+                "color": "rgb(222, 15, 43)",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 6,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "sum(count_over_time(({instance=\"$instance\"} |~ \"(?i)$searchable_pattern\")[$__interval]))",
+          "hide": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Count: of $searchable_pattern",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "description": "Show log messages that match search pattern",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "{instance=\"$instance\"} |~ \"(?i)$searchable_pattern\" ",
+          "hide": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Live logs",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "description": "Summarize log messages per file",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stderr"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C4162A",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "stdout"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#37872D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 0,
+        "y": 12
+      },
+      "id": 19,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "7.0.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time(({instance=\"$instance\"})[$__interval])) by (filename)",
+          "hide": false,
+          "legendFormat": "{{filename}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Total count of log messages",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "description": "Summarize log files that match searchable pattern",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -119,13 +417,14 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 9,
-        "x": 0,
-        "y": 1
+        "h": 7,
+        "w": 12,
+        "x": 7,
+        "y": 12
       },
       "id": 20,
       "interval": "1m",
+      "links": [],
       "maxDataPoints": "",
       "options": {
         "legend": {
@@ -146,69 +445,144 @@
           "fields": "",
           "values": false
         },
-        "sort": "desc",
         "tooltip": {
-          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "6.4.3",
       "targets": [
         {
           "datasource": {
+            "type": "loki",
             "uid": "${DS_LOKI}"
           },
-          "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(count_over_time(({container_name=~\"$container_name\", service_name=~\"$service_name\", instance=~\"$instance\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\")[$__interval])) by (service_name)",
-          "legendFormat": "{{service_name}}",
+          "expr": "sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"} |~ \"(?i)$searchable_pattern\")[$__interval])) by (filename)",
+          "legendFormat": "{{filename}}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "\"$searchable_pattern\" pattern matches distribution per service",
+      "title": "Matched word: \"$searchable_pattern\"",
       "type": "piechart"
     },
     {
       "datasource": {
+        "type": "loki",
         "uid": "${DS_LOKI}"
       },
+      "description": "Percentage of log messages that match searchable pattern",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "#299c46",
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 10
+              },
+              {
+                "color": "#C4162A",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 19,
+        "y": 12
+      },
+      "id": 9,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
+      "pluginVersion": "9.1.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "expr": "sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"} |~ \"(?i)$searchable_pattern\")[$__interval])) * 100 / sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"})[$__interval]))",
+          "hide": false,
+          "refId": "A"
+        }
+      ],
+      "title": "\"$searchable_pattern\" Percentage for specified time",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "${DS_LOKI}"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 100,
-            "gradientMode": "opacity",
+            "fillOpacity": 75,
+            "gradientMode": "hue",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
-              "log": 10,
-              "type": "log"
+              "type": "linear"
             },
-            "showPoints": "never",
-            "showValues": false,
+            "showPoints": "always",
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "none"
+              "mode": "normal"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -220,785 +594,56 @@
             "steps": [
               {
                 "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
+                "value": null
               }
             ]
-          },
-          "unit": "short"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 15,
-        "x": 9,
-        "y": 1
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 19
       },
-      "id": 10,
-      "maxDataPoints": 100,
+      "id": 18,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": "",
       "options": {
-        "dataLinks": [],
         "legend": {
           "calcs": [],
-          "displayMode": "table",
+          "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
+          "mode": "single",
+          "sort": "none"
         }
       },
-      "pluginVersion": "12.3.1",
+      "pluginVersion": "9.0.2",
       "targets": [
         {
           "datasource": {
+            "type": "loki",
             "uid": "${DS_LOKI}"
           },
-          "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(rate(({container_name=~\"$container_name\", instance=~\"$instance\", service_name=~\"$service_name\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\")[30s])) by (service_name)",
-          "hide": false,
-          "legendFormat": "{{service_name}}",
+          "expr": "sum(count_over_time(({instance=\"$instance\", filename=~\"$filename\"} |~ \"(?i)$searchable_pattern\")[$__interval])) by (filename)",
+          "legendFormat": "{{filename}}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Historical \"$searchable_pattern\" pattern matches distribution per service",
+      "title": "Matched word: \"$searchable_pattern\" per log file",
       "type": "timeseries"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 11
-      },
-      "id": 21,
-      "panels": [
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "description": "Live logs is a like 'tail -f' in a real time",
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 14,
-            "w": 24,
-            "x": 0,
-            "y": 52
-          },
-          "id": 2,
-          "options": {
-            "dedupStrategy": "numbers",
-            "enableInfiniteScrolling": false,
-            "enableLogDetails": true,
-            "prettifyLogMessage": false,
-            "showControls": false,
-            "showLabels": true,
-            "showTime": true,
-            "sortOrder": "Ascending",
-            "wrapLogMessage": true
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "forward",
-              "editorMode": "code",
-              "expr": "{container_name=~\"$container_name\", service_name=~\"$service_name\", instance=~\"$instance\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\"",
-              "hide": false,
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "Live logs (exluded pattern of `${service_name}_exclude` variable, the same as in another pannels of service inside the raw)",
-          "type": "logs"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "description": "Total  Count of log lines in the specified time range",
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "color": "rgb(31, 255, 7)",
-                      "text": "0"
-                    }
-                  },
-                  "type": "special"
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "rgb(31, 255, 7)",
-                    "value": 0
-                  },
-                  {
-                    "color": "rgb(31, 255, 7)",
-                    "value": 10
-                  },
-                  {
-                    "color": "rgb(31, 255, 7)",
-                    "value": 50
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 0,
-            "y": 66
-          },
-          "id": 11,
-          "maxDataPoints": 100,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", instance=~\"$instance\", service_name=~\"$service_name\"} !~ \"(?i)$[[service_name]]_exclude\")[$__interval]))",
-              "hide": false,
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "All logs count",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "unit": "short"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "stderr"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "#C4162A",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "stdout"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "#37872D",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 4,
-            "x": 3,
-            "y": 66
-          },
-          "id": 19,
-          "maxDataPoints": 100,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true,
-              "values": [
-                "value",
-                "percent"
-              ]
-            },
-            "pieType": "pie",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "sort": "desc",
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", service_name=~\"$service_name\"} !~ \"(?i)$[[service_name]]_exclude\")[$__interval])) by (instance)",
-              "hide": false,
-              "legendFormat": "{{instance}}",
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "All service logs per instance",
-          "type": "piechart"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "Count",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "bars",
-                "fillOpacity": 100,
-                "gradientMode": "opacity",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 3,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 17,
-            "x": 7,
-            "y": 66
-          },
-          "id": 24,
-          "interval": "1m",
-          "maxDataPoints": "",
-          "options": {
-            "dataLinks": [],
-            "legend": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", service_name=~\"$service_name\"} !~ \"(?i)$[[service_name]]_exclude\")[$__interval])) by (instance)",
-              "legendFormat": "{{service_name}}",
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "All service logs count historical change per instance",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "description": "Total Count: of $searchable_pattern in the specified time range",
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "color": "rgb(222, 15, 43)",
-                      "text": "0"
-                    }
-                  },
-                  "type": "special"
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "rgb(222, 15, 43)",
-                    "value": 0
-                  },
-                  {
-                    "color": "rgb(222, 15, 43)",
-                    "value": 10
-                  },
-                  {
-                    "color": "rgb(222, 15, 43)",
-                    "value": 50
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 3,
-            "x": 0,
-            "y": 72
-          },
-          "id": 6,
-          "maxDataPoints": 100,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", instance=~\"$instance\", service_name=~\"$service_name\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\")[$__interval]))",
-              "hide": false,
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "\"$searchable_pattern\" matches count",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "unit": "short"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "stderr"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "#C4162A",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "stdout"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "#37872D",
-                      "mode": "fixed"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 4,
-            "x": 3,
-            "y": 74
-          },
-          "id": 23,
-          "maxDataPoints": 100,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true,
-              "values": [
-                "value",
-                "percent"
-              ]
-            },
-            "pieType": "pie",
-            "reduceOptions": {
-              "calcs": [
-                "sum"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "sort": "desc",
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", service_name=~\"$service_name\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\")[$__interval])) by (instance)",
-              "hide": false,
-              "legendFormat": "{{instance}}",
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "\"$searchable_pattern\" matches per instance",
-          "type": "piechart"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "Count",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "bars",
-                "fillOpacity": 100,
-                "gradientMode": "opacity",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 3,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 17,
-            "x": 7,
-            "y": 74
-          },
-          "id": 18,
-          "interval": "1m",
-          "maxDataPoints": "",
-          "options": {
-            "dataLinks": [],
-            "legend": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "displayMode": "table",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", service_name=~\"$service_name\", instance=~\"$instance\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\")[$__interval])) by (instance)",
-              "legendFormat": "{{service_name}}",
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "\"$searchable_pattern\" matches historical",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "color": "#299c46",
-                      "text": "0"
-                    }
-                  },
-                  "type": "special"
-                }
-              ],
-              "max": 100,
-              "min": 0,
-              "noValue": "0",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "#299c46",
-                    "value": 0
-                  },
-                  {
-                    "color": "rgba(237, 129, 40, 0.89)",
-                    "value": 10
-                  },
-                  {
-                    "color": "#C4162A",
-                    "value": 50
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 3,
-            "x": 0,
-            "y": 77
-          },
-          "id": 9,
-          "maxDataPoints": 100,
-          "options": {
-            "minVizHeight": 75,
-            "minVizWidth": 75,
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": false,
-            "sizing": "auto"
-          },
-          "pluginVersion": "12.3.1",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "${DS_LOKI}"
-              },
-              "direction": "backward",
-              "editorMode": "code",
-              "expr": "sum(count_over_time(({container_name=~\"$container_name\", instance=~\"$instance\", service_name=~\"$service_name\"} |~ \"(?i)$searchable_pattern\" !~ \"(?i)$[[service_name]]_exclude\")[$__interval])) * 100 / sum(count_over_time(({container_name=~\"$container_name\", instance=~\"$instance\", service_name=~\"$service_name\"} !~ \"(?i)$[[service_name]]_exclude\")[$__interval]))",
-              "hide": false,
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "\"$searchable_pattern\" matches part of all logs for specified time",
-          "type": "gauge"
-        }
-      ],
-      "repeat": "service_name",
-      "title": "$service_name",
-      "type": "row"
     }
   ],
-  "preload": false,
-  "refresh": "10s",
-  "schemaVersion": 42,
+  "refresh": "1m",
+  "schemaVersion": 37,
+  "style": "dark",
   "tags": [
     "Loki",
     "logging"
@@ -1006,112 +651,88 @@
   "templating": {
     "list": [
       {
-        "current": {},
-        "datasource": {
-          "type": "loki",
-          "uid": "${DS_LOKI}"
-        },
-        "definition": "label_values({container_name=~\".+\"}, container_name)",
-        "includeAll": true,
-        "label": "Container",
-        "multi": true,
-        "name": "container_name",
-        "options": [],
-        "query": "label_values({container_name=~\".+\"}, container_name)",
-        "refresh": 2,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "loki",
-          "uid": "${DS_LOKI}"
-        },
-        "definition": "label_values({container_name=~\"$container_name\"}, service_name)",
-        "includeAll": true,
-        "label": "Service",
-        "multi": true,
-        "name": "service_name",
-        "options": [],
-        "query": "label_values({container_name=~\"$container_name\"}, service_name)",
-        "refresh": 2,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "loki",
-          "uid": "${DS_LOKI}"
-        },
-        "definition": "label_values({container_name=~\"$container_name\"}, instance)",
-        "includeAll": true,
-        "label": "Instance",
-        "multi": true,
-        "name": "instance",
-        "options": [],
-        "query": "label_values({container_name=~\"$container_name\"}, instance)",
-        "refresh": 2,
-        "regex": "",
-        "type": "query"
-      },
-      {
         "current": {
-          "text": "",
-          "value": ""
+          "selected": false,
+          "text": "error",
+          "value": "error"
         },
-        "label": "Search regex (case insensitive)",
+        "description": "Define a case insensitive pattern to search for in log files",
+        "hide": 0,
+        "label": "Search (case insensitive)",
         "name": "searchable_pattern",
         "options": [
           {
             "selected": true,
-            "text": "",
-            "value": ""
+            "text": "error",
+            "value": "error"
           }
         ],
-        "query": "",
+        "query": "error",
+        "skipUrlSync": false,
         "type": "textbox"
       },
       {
-        "current": {
-          "text": "",
-          "value": "${DS_LOKI}",
-          "selected": true
+        "current": {},
+        "datasource": {
+          "type": "loki",
+          "uid": "${DS_LOKI}"
         },
+        "definition": "label_values({instance=~\".+\"}, instance)",
+        "description": "\"instance\" is a log label to identify which server from which the log originated.",
+        "hide": 0,
         "includeAll": false,
-        "label": "Data Source",
-        "name": "DS_LOKI",
+        "multi": false,
+        "name": "instance",
         "options": [],
-        "query": "loki",
+        "query": "label_values({instance=~\".+\"}, instance)",
         "refresh": 1,
         "regex": "",
-        "type": "datasource"
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       },
       {
-        "description": "Pattern to exclude for alloy service, that will be defined dynamically in $service_name variable. To create exclude pattern for another services just create duplicate of this variable with name like \"${service_name}_exclude\". For example prometheus_exclude, blackbox_exclude, yourapp_exclude.",
-        "hide": 2,
-        "name": "alloy_exclude",
-        "query": "${VAR_ALLOY_EXCLUDE}",
-        "skipUrlSync": true,
-        "type": "constant",
-        "current": {
-          "value": "${VAR_ALLOY_EXCLUDE}",
-          "text": "${VAR_ALLOY_EXCLUDE}",
-          "selected": false
+        "current": {},
+        "datasource": {
+          "type": "loki",
+          "uid": "${DS_LOKI}"
         },
-        "options": [
-          {
-            "value": "${VAR_ALLOY_EXCLUDE}",
-            "text": "${VAR_ALLOY_EXCLUDE}",
-            "selected": false
-          }
-        ]
+        "definition": "label_values({filename=~\".+\"}, filename)",
+        "description": "Name of the log file",
+        "hide": 0,
+        "includeAll": true,
+        "multi": false,
+        "name": "filename",
+        "options": [],
+        "query": "label_values({filename=~\".+\"}, filename)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Loki",
+          "value": "Loki"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "loki_source",
+        "options": [],
+        "query": "loki",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
       }
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -1128,9 +749,8 @@
     ]
   },
   "timezone": "",
-  "title": "Logging Dashboard via Loki v3",
-  "uid": "addtw42",
-  "version": 13,
-  "weekStart": "",
-  "gnetId": 24574
+  "title": "Loki log explorer",
+  "uid": "fRIvzUZMz",
+  "version": 2,
+  "weekStart": ""
 }
