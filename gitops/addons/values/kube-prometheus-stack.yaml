@@ -38,12 +38,10 @@ grafana:
         cpu: 10m
         memory: 32Mi
       limits:
-        memory: 64Mi
+        memory: 128Mi
     dashboards:
       enabled: true
       searchNamespace: monitoring
-      label: grafana_dashboard
-      folder: /var/lib/grafana/dashboards
       # Put each dashboard in the folder named by this ConfigMap annotation.
       # Requires provider.foldersFromFilesStructure below so Grafana also
       # creates the folders described by the sidecar's directory layout.
