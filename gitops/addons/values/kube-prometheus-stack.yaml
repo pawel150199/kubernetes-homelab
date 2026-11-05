@@ -81,6 +81,42 @@ prometheus:
 
 alertmanager:
   enabled: true
+  # TODO: Update receivers and route
+  #config:
+  #  global:
+  #    resolve_timeout: 5m
+  #    slack_api_url: <slack_api_url>
+  #  route:
+  #    receiver: "default-slack"
+  #    group_by: ["alername", "namespace", "job"]
+  #    group_wait: 2m
+  #    group_interval: 1h
+  #    repeat_interval: 48h
+  #    routes:
+  #      - receiver: "pagerduty-critical"
+  #        matchers:
+  #          - severity = critical
+  #        group_wait: 30s
+  #        repeat_interval: 4h
+  #        continue: true
+  #      - receiver: "slack-warnings"
+  #        matchers:
+  #          - severity = warning
+  #        group_waith: 1m
+  #        repeat_interval: 48h
+  #  receivers:
+  #    - name: "default-slack"
+  #      slack_configs:
+  #        - channel: '#k8s-alerts'
+  #          send_resolved: true
+  #    - name: "pagerduty-critical"
+  #      pagerduty_config:
+  #        - routing_key: "<pager_duty_integration_key>"
+  #          severity: "critical"
+  #    - name: "slack-warnings"
+  #      slack_configs:
+  #        - channel: "#k8s-warnings"
+  #          send_resolved: true
   alertmanagerSpec:
     resources:
       requests:
@@ -96,6 +132,9 @@ alertmanager:
           resources:
             requests:
               storage: 2Gi
+
+# TODO: Add custom rules
+additionalPrometheusRulesMap: {}
 
 nodeExporter:
   enabled: true
