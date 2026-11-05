@@ -12,7 +12,8 @@ ingress:
   enabled: true
   class: "tailscale"
   nginxIngressAnnotations: false
-  tls: false
+  tls: true
+  tlsSecret: ""
   hostname: "vaultwarden"
 
 # TODO: After creation of needed accounts enable it
