@@ -16,8 +16,9 @@ ingress:
   tlsSecret: ""
   hostname: "vaultwarden"
 
-# TODO: After creation of needed accounts enable it
-signupsVerify: "false"
+# TODO: Currently there is not SMTP server so
+# it won't be possible to create new accounts
+signupsVerify: "true"
 
 resources:
   requests:
