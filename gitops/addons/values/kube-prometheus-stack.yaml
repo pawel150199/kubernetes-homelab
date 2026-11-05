@@ -30,7 +30,7 @@ grafana:
           - grafana
   persistence:
     enabled: true
-    size: 5Gi
+    size: 2Gi
     storageClassName: hcloud-volumes
   sidecar:
     resources:
