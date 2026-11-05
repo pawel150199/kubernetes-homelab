@@ -1,10 +1,26 @@
+domain: "https://vaultwarden.tail692efe.ts.net"
+
 storage:
   data:
     name: "vaultwarden-data"
     size: "5Gi"
     class: "hcloud-volumes"
     accessMode: "ReadWriteOnce"
-    keepPvc: false
-service:
-  annotations:
-    tailscale.com/expose: "true"
+    keepPvc: true
+
+ingress:
+  enabled: true
+  class: "tailscale"
+  nginxIngressAnnotations: false
+  tls: false
+  hostname: "vaultwarden"
+
+# TODO: After creation of needed accounts enable it
+signupsVerify: "false"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 512Mi
