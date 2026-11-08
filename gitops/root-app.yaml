@@ -1,4 +1,4 @@
-# App-of-Apps for user applications
+# Application for user applications
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -22,7 +22,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
 ---
-# App-of-Apps for cluster addons
+# Application for addons in  cluster
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -45,3 +45,27 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+# Application for Secrets Operator
+# Bitwarden as a Secret Manager has been used
+# To define secrets in the cluster this application is used
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: secrets
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/pawel150199/kubernetes-homelab.git
+    targetRevision: master
+    path: gitops/secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
