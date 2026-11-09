@@ -20,3 +20,5 @@ ArgoCD does not create it — create it once by hand, before the first sync:
 kubectl -n kube-system create secret generic hcloud \
   --from-literal=token=<HCLOUD_TOKEN>
 ```
+
+Token have to have access only to dedicated project
