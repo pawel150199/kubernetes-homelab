@@ -8,3 +8,10 @@ the cluster — everything below is managed from Git. Keeping in-cluster state (
 - `root-app.yaml` — root Applications (App-of-Apps) pointing Argo CD to `addons/` and `apps/`. Argo CD will sync all `Application` CRs placed in `addons/` and `apps/`.
 - `addons/` — `Application` CR definitions for cluster addons (one per file).
 - `apps/` — `Application` CR definitions for your own workloads.
+
+> NOTE: The root-app Application in ArgoCD have to be created manually.
+> To update this resource use the same command as for creation.
+> Use following command:
+```bash
+kubectl apply -f gitops/root-app.yaml
+```

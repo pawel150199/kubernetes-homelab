@@ -46,9 +46,10 @@ spec:
     syncOptions:
       - CreateNamespace=true
 ---
-# Application for Secrets Operator
-# Bitwarden as a Secret Manager has been used
-# To define secrets in the cluster this application is used
+# Application for Secrets definition
+# Bitwarden is used as the cluster secret manager.
+# To fetch some secrets from Bitwarden some additional
+# Config have to be created
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
