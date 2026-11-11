@@ -45,6 +45,14 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # cert-manager CRDs may not exist yet on a fresh bootstrap
+      - SkipDryRunOnMissingResource=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
 ---
 # Application for Secrets definition
 # Bitwarden is used as the cluster secret manager.
@@ -65,7 +73,7 @@ spec:
     path: gitops/secrets
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: external-secrets
   syncPolicy:
     automated:
       prune: true
